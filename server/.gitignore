@@ -1,0 +1,46 @@
+### Binaries and executables
+
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server/server  # If your compiled binary is named 'server' 
+
+### Test binaries
+
+*.test
+*.out 
+
+### Architecture-specific outputs
+
+current/ 
+
+### Dependency directories
+
+### (Go modules don't usually need this, but good if you use vendoring)
+
+vendor/ 
+
+### Environment variables (Crucial for security!)
+
+.env
+.env.*
+!.env.example 
+
+### IDEs and Editors
+
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw? 
+
+### OS generated files
+
+.DS_Store
+Thumbs.db
