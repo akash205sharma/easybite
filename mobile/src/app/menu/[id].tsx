@@ -6,21 +6,57 @@ import {
   Text,
   View,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
+
 import { useCart } from "@/context/CartContext";
-import { menu } from "@/constants/menu";
+import { getMenuItem, MenuItem } from "@/services/api";
+
+
 
 export default function FoodDetails() {
   const [quantity, setQuantity] = useState(1);
+  const [item, setItem] = useState<MenuItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const { addToCart } = useCart();
+
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const item = menu.find((food) => food.id === id);
+  useEffect(() => {
+    loadItem();
+  }, [id]);
 
-  if (!item) {
+  async function loadItem() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getMenuItem(Number(id));
+
+      setItem(data);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to load food");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
     return (
       <View style={styles.center}>
-        <Text>Food not found</Text>
+        <ActivityIndicator size="large" />
+        <Text>Loading food...</Text>
+      </View>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <View style={styles.center}>
+        <Text>{error || "Food not found"}</Text>
       </View>
     );
   }

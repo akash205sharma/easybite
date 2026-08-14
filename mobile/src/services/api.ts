@@ -35,10 +35,76 @@ export type MenuCategory = {
   menuItems: MenuItem[];
 };
 
+export type CreateOrderItem = {
+  menuItemId: number;
+  quantity: number;
+};
+
+export type CreateOrderResponse = {
+  id: number;
+  status: string;
+  total: number;
+};
+
+export type OrderItem = {
+  id: number;
+  orderId: number;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+};
+
+export type Order = {
+  id: number;
+  userId: number;
+  status: string;
+  total: number;
+  createdAt: string;
+  items: OrderItem[];
+};
+
+
+
 export async function getRestaurantMenu(
   restaurantId: number
 ) {
   return request<MenuCategory[]>(
     `/restaurants/${restaurantId}/menu`
   );
+}
+
+export async function createOrder(
+  token: string,
+  items: CreateOrderItem[]
+) {
+  return request<CreateOrderResponse>("/orders", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ items }),
+  });
+}
+
+export async function getMenuItem(id: number) {
+  return request<MenuItem>(`/menu/${id}`);
+}
+
+export async function getOrders(token: string) {
+  return request<Order[]>("/orders", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function getOrder(
+  token: string,
+  id: number
+) {
+  return request<Order>(`/orders/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 }

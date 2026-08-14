@@ -6,18 +6,47 @@ import {
   Text,
   View,
 } from "react-native";
+import { Alert } from "react-native";
+
+import { useAuth } from "@/context/AuthContext";
+import { createOrder } from "@/services/api";
 
 import { useCart } from "@/context/CartContext";
 
 export default function CheckoutScreen() {
-  const { items, total } = useCart();
+
+  const { token } = useAuth();
+
+  const { items, total, clearCart, } = useCart();
 
   const tax = Math.round(total * 0.05);
   const grandTotal = total + tax;
 
-  const placeOrder = () => {
-    // TODO: POST /api/orders
-    router.replace("/order/1");
+  const placeOrder = async () => {
+    if (!token) {
+      return;
+    }
+
+    try {
+      const order = await createOrder(
+        token,
+        items.map((item) => ({
+          menuItemId: item.id,
+          quantity: item.quantity,
+        }))
+      );
+
+      clearCart();
+
+      router.replace(`/order/${order.id}`);
+    } catch (error) {
+      Alert.alert(
+        "Order failed",
+        error instanceof Error
+          ? error.message
+          : "Something went wrong"
+      );
+    }
   };
 
   return (

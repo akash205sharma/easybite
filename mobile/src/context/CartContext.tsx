@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 
 type CartItem = {
-  id: string;
+  id: number;
   name: string;
   price: number;
   image: string;
@@ -10,10 +10,14 @@ type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
-  addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  increaseQuantity: (id: string) => void;
-  decreaseQuantity: (id: string) => void;
-  removeFromCart: (id: string) => void;
+  addToCart: (
+    item: Omit<CartItem, "quantity">,
+    quantity?: number
+  ) => void;
+  increaseQuantity: (id: number) => void;
+  decreaseQuantity: (id: number) => void;
+  removeFromCart: (id: number) => void;
+  clearCart: () => void;
   total: number;
   itemCount: number;
 };
@@ -34,9 +38,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return current.map((cartItem) =>
           cartItem.id === item.id
             ? {
-                ...cartItem,
-                quantity: cartItem.quantity + quantity,
-              }
+              ...cartItem,
+              quantity: cartItem.quantity + quantity,
+            }
             : cartItem
         );
       }
@@ -45,7 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const increaseQuantity = (id: string) => {
+  const increaseQuantity = (id: number) => {
     setItems((current) =>
       current.map((item) =>
         item.id === id
@@ -55,7 +59,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const decreaseQuantity = (id: string) => {
+  const decreaseQuantity = (id: number) => {
     setItems((current) =>
       current
         .map((item) =>
@@ -67,10 +71,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: number) => {
     setItems((current) =>
       current.filter((item) => item.id !== id)
     );
+  };
+
+  const clearCart = () => {
+    setItems([]);
   };
 
   const total = useMemo(
@@ -95,6 +103,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         increaseQuantity,
         decreaseQuantity,
         removeFromCart,
+        clearCart,
         total,
         itemCount,
       }}

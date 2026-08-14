@@ -7,43 +7,66 @@ import AppTabs from '@/components/app-tabs';
 
 SplashScreen.preventAutoHideAsync();
 
-import { Stack } from "expo-router";
+
+import { Redirect, Stack } from "expo-router";
+
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 
-export default function RootLayout() {
-  return (
-    <CartProvider>
+function RootNavigator() {
+  const { token, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (!token) {
+    return (
       <Stack>
         <Stack.Screen
           name="(auth)"
           options={{ headerShown: false }}
         />
-
-        <Stack.Screen
-          name="(tabs)"
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="menu/[id]"
-          options={{ headerShown: false }}
-        />
-
-        <Stack.Screen
-          name="cart"
-          options={{ title: "Cart" }}
-        />
-
-        <Stack.Screen
-          name="checkout"
-          options={{ title: "Checkout" }}
-        />
-
-        <Stack.Screen
-          name="order/[id]"
-          options={{ title: "Order Status" }}
-        />
       </Stack>
-    </CartProvider>
+    );
+  }
+
+  return (
+    <Stack>
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="menu/[id]"
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="cart"
+        options={{ title: "Cart" }}
+      />
+
+      <Stack.Screen
+        name="checkout"
+        options={{ title: "Checkout" }}
+      />
+
+      <Stack.Screen
+        name="order/[id]"
+        options={{ title: "Order Status" }}
+      />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <RootNavigator />
+      </CartProvider>
+    </AuthProvider>
   );
 }
