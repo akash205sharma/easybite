@@ -28,24 +28,3 @@ useFocusEffect(
     }, [token])
 );
 
-
-
-1. Role in User model
-       ↓
-2. JWT includes role
-       ↓
-3. AdminRequired middleware
-       ↓
-4. Admin orders API
-       ↓
-5. Tiny Admin Orders screen
-       ↓
-6. Customer order status refresh
-       ↓
-7. Persist cart
-       ↓
-8. Loading/error/empty states
-       ↓
-9. Polish UI
-       ↓
-10. Deploy backend + build APK

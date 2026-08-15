@@ -15,9 +15,10 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println(".env file not found")
-	}
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Println(".env file not found")
+	// }
+	_ = godotenv.Load()
 
 	db, err := config.ConnectDatabase()
 	if err != nil {
@@ -64,5 +65,5 @@ func main() {
 
 	routes.RegisterRoutes(router, db)
 
-	router.Run(":" + port)
+	router.Run("0.0.0.0:" + port)
 }
