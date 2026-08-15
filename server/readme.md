@@ -1,3 +1,7 @@
+## learning
+under stand about jwt and the calim of it wiht middleware
+understand handlers code
+
 
 ### models
 

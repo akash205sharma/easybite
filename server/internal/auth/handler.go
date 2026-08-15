@@ -74,6 +74,7 @@ func (h *Handler) Register(c *gin.Context) {
 		"id":    user.ID,
 		"name":  user.Name,
 		"email": user.Email,
+		"role": user.Role,
 	})
 }
 
@@ -158,5 +159,6 @@ func (h *Handler) Me(c *gin.Context) {
 		"id":    user.ID,
 		"name":  user.Name,
 		"email": user.Email,
+		"role": user.Role,
 	})
 }

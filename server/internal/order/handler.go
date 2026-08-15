@@ -103,7 +103,6 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 	})
 }
 
-
 func (h *Handler) GetOrders(c *gin.Context) {
 	userID := c.MustGet("userID").(uint)
 
@@ -124,7 +123,6 @@ func (h *Handler) GetOrders(c *gin.Context) {
 
 	c.JSON(http.StatusOK, orders)
 }
-
 
 func (h *Handler) GetOrder(c *gin.Context) {
 	userID := c.MustGet("userID").(uint)
@@ -160,4 +158,92 @@ func (h *Handler) GetOrder(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, order)
+}
+
+// admin role based access for the Order management
+
+type UpdateOrderStatusRequest struct {
+	Status models.OrderStatus `json:"status" binding:"required"`
+}
+
+func (h *Handler) UpdateOrderStatus(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid order id",
+		})
+		return
+	}
+
+	var req UpdateOrderStatusRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	validStatuses := map[models.OrderStatus]bool{
+		models.OrderPlaced:    true,
+		models.OrderConfirmed: true,
+		models.OrderPreparing: true,
+		models.OrderReady:     true,
+		models.OrderCompleted: true,
+		models.OrderCancelled: true,
+	}
+
+	if !validStatuses[req.Status] {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid order status",
+		})
+		return
+	}
+
+	var order models.Order
+
+	if err := h.DB.First(&order, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "order not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to find order",
+		})
+		return
+	}
+
+	order.Status = req.Status
+
+	if err := h.DB.Save(&order).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to update order",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, order)
+}
+
+func (h *Handler) GetAdminOrders(c *gin.Context) {
+	var orders []models.Order
+
+	if err := h.DB.
+		Preload("Items").
+		Preload("User").
+		Preload("Items.MenuItem").
+		Order("created_at DESC").
+		Find(&orders).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch orders",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, orders)
 }

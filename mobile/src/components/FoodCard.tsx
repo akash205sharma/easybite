@@ -1,45 +1,87 @@
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
+import { useState } from "react";
 
 type FoodCardProps = {
   item: {
+    id: number;
     name: string;
     description: string;
     price: number;
     image: string;
   };
   onPress: () => void;
+  onAdd: () => void;
 };
 
 export default function FoodCard({
   item,
   onPress,
+  onAdd,
 }: FoodCardProps) {
+
+
+  const [added, setAdded] = useState(false);
+
+  function handleAdd() {
+    onAdd();
+
+    setAdded(true);
+
+    setTimeout(() => {
+      setAdded(false);
+    }, 1200);
+  }
+
   return (
     <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Pressable onPress={onPress}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.image}
+        />
+      </Pressable>
 
       <View style={styles.content}>
-        <Text style={styles.name}>{item.name}</Text>
+        <Pressable onPress={onPress}>
+          <Text style={styles.name} numberOfLines={1}>
+            {item.name}
+          </Text>
 
-        <Text style={styles.description} numberOfLines={2}>
-          {item.description}
-        </Text>
+          <Text
+            style={styles.description}
+            numberOfLines={2}
+          >
+            {item.description}
+          </Text>
+        </Pressable>
 
         <View style={styles.bottom}>
-          <Text style={styles.price}>₹{item.price}</Text>
+          <Text style={styles.price}>
+            ₹{item.price}
+          </Text>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={onPress}
+          <Pressable
+            style={[
+              styles.button,
+              added && styles.addedButton,
+            ]}
+            onPress={handleAdd}
           >
-            <Text style={styles.buttonText}>ADD</Text>
-          </TouchableOpacity>
+            <Text
+              style={[
+                styles.buttonText,
+                added && styles.addedButtonText,
+              ]}
+            >
+              {added ? "✓ ADDED" : "ADD"}
+            </Text>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -53,6 +95,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     overflow: "hidden",
+  },
+  addedButton: {
+    backgroundColor: "#e8f5e9",
+    borderColor: "#c8e6c9",
+  },
+
+  addedButtonText: {
+    color: "#2e7d32",
   },
 
   image: {

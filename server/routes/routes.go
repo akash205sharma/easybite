@@ -54,4 +54,19 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		middleware.AuthRequired(),
 		orderHandler.GetOrder,
 	)
+
+	//admin access needed
+	api.PATCH(
+		"/admin/orders/:id/status",
+		middleware.AuthRequired(),
+		middleware.AdminRequired(),
+		orderHandler.UpdateOrderStatus,
+	)
+	api.GET(
+		"/admin/orders",
+		middleware.AuthRequired(),
+		middleware.AdminRequired(),
+		orderHandler.GetAdminOrders,
+	)
+
 }

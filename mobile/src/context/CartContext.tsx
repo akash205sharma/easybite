@@ -1,4 +1,11 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type CartItem = {
   id: number;
@@ -24,23 +31,71 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+const CART_STORAGE_KEY = "@easybite_cart";
+
+export function CartProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  // Load cart when app starts
+  useEffect(() => {
+    async function loadCart() {
+      try {
+        const storedCart =
+          await AsyncStorage.getItem(CART_STORAGE_KEY);
+
+        if (storedCart) {
+          setItems(JSON.parse(storedCart));
+        }
+      } catch (error) {
+        console.error("Failed to load cart:", error);
+      } finally {
+        setLoaded(true);
+      }
+    }
+
+    loadCart();
+  }, []);
+
+  // Persist cart whenever it changes
+  useEffect(() => {
+    if (!loaded) return;
+
+    async function saveCart() {
+      try {
+        await AsyncStorage.setItem(
+          CART_STORAGE_KEY,
+          JSON.stringify(items)
+        );
+      } catch (error) {
+        console.error("Failed to save cart:", error);
+      }
+    }
+
+    saveCart();
+  }, [items, loaded]);
 
   const addToCart = (
     item: Omit<CartItem, "quantity">,
     quantity = 1
   ) => {
     setItems((current) => {
-      const existing = current.find((cartItem) => cartItem.id === item.id);
+      const existing = current.find(
+        (cartItem) => cartItem.id === item.id
+      );
 
       if (existing) {
         return current.map((cartItem) =>
           cartItem.id === item.id
             ? {
-              ...cartItem,
-              quantity: cartItem.quantity + quantity,
-            }
+                ...cartItem,
+                quantity:
+                  cartItem.quantity + quantity,
+              }
             : cartItem
         );
       }
@@ -53,7 +108,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((current) =>
       current.map((item) =>
         item.id === id
-          ? { ...item, quantity: item.quantity + 1 }
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+            }
           : item
       )
     );
@@ -64,7 +122,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       current
         .map((item) =>
           item.id === id
-            ? { ...item, quantity: item.quantity - 1 }
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+              }
             : item
         )
         .filter((item) => item.quantity > 0)
@@ -84,14 +145,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const total = useMemo(
     () =>
       items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+        (sum, item) =>
+          sum + item.price * item.quantity,
         0
       ),
     [items]
   );
 
   const itemCount = useMemo(
-    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    () =>
+      items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      ),
     [items]
   );
 
@@ -117,7 +183,9 @@ export function useCart() {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error("useCart must be used inside CartProvider");
+    throw new Error(
+      "useCart must be used inside CartProvider"
+    );
   }
 
   return context;

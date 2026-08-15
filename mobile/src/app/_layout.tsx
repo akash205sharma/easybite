@@ -57,6 +57,13 @@ function RootNavigator() {
         name="order/[id]"
         options={{ title: "Order Status" }}
       />
+
+      <Stack.Screen
+        name="admin/orders"
+        options={{
+          title: "Restaurant Orders",
+        }}
+      />
     </Stack>
   );
 }

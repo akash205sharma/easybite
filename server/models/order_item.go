@@ -8,4 +8,5 @@ type OrderItem struct {
 
 	Quantity int `json:"quantity"`
 	Price    float64 `json:"price"`
+	MenuItem MenuItem `json:"menuItem"`
 }

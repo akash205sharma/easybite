@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/akash205sharma/server/models"
 )
 
 func AuthRequired() gin.HandlerFunc {
@@ -66,7 +67,36 @@ func AuthRequired() gin.HandlerFunc {
 			return
 		}
 
+		
+		role, ok := claims["role"].(string)
+		
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid role",
+			})
+			c.Abort()
+			return
+		}
+		
 		c.Set("userID", uint(userID))
+		c.Set("role", role)
+
+
+		c.Next()
+	}
+}
+
+func AdminRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, exists := c.Get("role")
+
+		if !exists || role != string(models.RoleAdmin) {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": "admin access required",
+			})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}

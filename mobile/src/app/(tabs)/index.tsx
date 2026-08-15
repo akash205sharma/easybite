@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   SectionList,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { useCart } from "@/context/CartContext";
 import FoodCard from "@/components/FoodCard";
 import {
   getRestaurantMenu,
@@ -18,6 +19,8 @@ export default function HomeScreen() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { addToCart } = useCart();
+
 
   useEffect(() => {
     loadMenu();
@@ -26,14 +29,14 @@ export default function HomeScreen() {
   async function loadMenu() {
     try {
       setLoading(true);
+      setError("");
 
       const data = await getRestaurantMenu(1);
 
       setCategories(data);
-      console.log(categories)
     } catch (err) {
       console.error(err);
-      setError("Failed to load menu");
+      setError("Failed to load menu. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -43,6 +46,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
+
         <Text style={styles.loadingText}>
           Loading menu...
         </Text>
@@ -53,7 +57,18 @@ export default function HomeScreen() {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text>{error}</Text>
+        <Text style={styles.errorText}>
+          {error}
+        </Text>
+
+        <Pressable
+          style={styles.retryButton}
+          onPress={loadMenu}
+        >
+          <Text style={styles.retryText}>
+            Try Again
+          </Text>
+        </Pressable>
       </View>
     );
   }
@@ -71,7 +86,17 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <FoodCard
             item={item}
-             onPress={() => router.push(`/menu/${item.id}`)}
+            onPress={() =>
+              router.push(`/menu/${item.id}`)
+            }
+            onAdd={() => {
+              addToCart({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+              });
+            }}
           />
         )}
         renderSectionHeader={({ section }) => (
@@ -80,7 +105,7 @@ export default function HomeScreen() {
           </Text>
         )}
         ListHeaderComponent={
-          <View>
+          <View style={styles.header}>
             <Text style={styles.greeting}>
               Good morning 👋
             </Text>
@@ -88,15 +113,22 @@ export default function HomeScreen() {
             <Text style={styles.restaurant}>
               EasyBite
             </Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>
+              No food available
+            </Text>
 
-            <TextInput
-              placeholder="Search food..."
-              style={styles.search}
-            />
+            <Text style={styles.emptyText}>
+              The restaurant menu is currently empty.
+            </Text>
           </View>
         }
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -113,40 +145,75 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
 
+  header: {
+    marginBottom: 8,
+  },
+
   greeting: {
     fontSize: 14,
-    color: "#666",
+    color: "#777",
+    marginBottom: 4,
   },
 
   restaurant: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "800",
-    marginTop: 4,
-    marginBottom: 20,
-  },
-
-  search: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-    fontSize: 16,
+    color: "#111",
+    marginBottom: 16,
   },
 
   sectionTitle: {
     fontSize: 21,
     fontWeight: "700",
+    color: "#111",
+    marginTop: 16,
     marginBottom: 12,
-    marginTop: 10,
   },
 
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    padding: 24,
   },
 
   loadingText: {
     marginTop: 10,
+    color: "#666",
+  },
+
+  errorText: {
+    color: "#666",
+    textAlign: "center",
+    fontSize: 15,
+    marginBottom: 14,
+  },
+
+  retryButton: {
+    backgroundColor: "#111",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+
+  retryText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+
+  empty: {
+    alignItems: "center",
+    paddingTop: 60,
+  },
+
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  emptyText: {
+    color: "#777",
+    marginTop: 6,
+    textAlign: "center",
   },
 });

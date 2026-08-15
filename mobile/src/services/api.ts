@@ -52,6 +52,7 @@ export type OrderItem = {
   menuItemId: number;
   quantity: number;
   price: number;
+  menuItem: MenuItem;
 };
 
 export type Order = {
@@ -61,6 +62,11 @@ export type Order = {
   total: number;
   createdAt: string;
   items: OrderItem[];
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 };
 
 
@@ -107,4 +113,32 @@ export async function getOrder(
       Authorization: `Bearer ${token}`,
     },
   });
+}
+
+
+// APis for the admin role
+
+export async function getAdminOrders(token: string) {
+  return request<Order[]>("/admin/orders", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function updateOrderStatus(
+  token: string,
+  orderId: number,
+  status: string
+) {
+  return request<Order>(
+    `/admin/orders/${orderId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
 }
