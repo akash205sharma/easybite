@@ -46,11 +46,6 @@ function RootNavigator() {
       />
 
       <Stack.Screen
-        name="cart"
-        options={{ title: "Cart" }}
-      />
-
-      <Stack.Screen
         name="checkout"
         options={{ title: "Checkout" }}
       />
