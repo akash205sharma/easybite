@@ -1,3 +1,6 @@
+go run ./cmd/server
+air ./cmd/main.go
+
 ## learning
 under stand about jwt and the calim of it wiht middleware
 understand handlers code

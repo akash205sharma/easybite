@@ -1,6 +1,9 @@
 ````md
 # EasyBite 🍔
 
+ EasyBite is a single-restaurant ordering system. The current scope focuses on customer ordering and a lightweight restaurant order-management interface. I intentionally kept the restaurant side limited to order management rather than building a complete restaurant ERP.
+
+
 EasyBite is a full-stack restaurant ordering application built with **React Native + Expo** and a **Go backend**.
 
 The project focuses on implementing a realistic food-ordering workflow with authentication, role-based access, cart management, order tracking, restaurant administration, and persistent data.
